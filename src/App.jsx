@@ -1,24 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, LineChart, Line, PieChart, Pie, Cell, ResponsiveContainer, AreaChart, Area } from 'recharts';
-import { Users, Clock, Calendar, Star, AlertTriangle } from 'lucide-react';
+import { Users, Clock, Calendar, Star, AlertTriangle, MapPin, Phone, Building2 } from 'lucide-react';
 import './index.css';
+import { branchData as realBranchData, offices } from './data/offices.js';
 
 const DMVDashboard = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [selectedBranch, setSelectedBranch] = useState('All Branches');
+  const [selectedCounty, setSelectedCounty] = useState('All Counties');
+  const counties = [...new Set(offices.map(o => o.county))].sort();
+  const filteredOffices = selectedCounty === 'All Counties'
+    ? offices
+    : offices.filter(o => o.county === selectedCounty);
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
 
-  const branchData = [
-    { name: 'Charlotte Main', visitors: 324, avgWait: 28, satisfaction: 4.2, staff: 12, available: 8 },
-    { name: 'Raleigh North', visitors: 198, avgWait: 15, satisfaction: 4.5, staff: 8, available: 6 },
-    { name: 'Greensboro', visitors: 156, avgWait: 22, satisfaction: 4.1, staff: 6, available: 4 },
-    { name: 'Winston-Salem', visitors: 142, avgWait: 18, satisfaction: 4.3, staff: 7, available: 5 },
-    { name: 'Durham', visitors: 189, avgWait: 25, satisfaction: 4.0, staff: 9, available: 7 }
-  ];
+  const branchData = realBranchData;
 
   const appointmentData = [
     { time: '8:00', scheduled: 24, walkins: 8, completed: 28 },
@@ -107,22 +106,21 @@ const DMVDashboard = () => {
         <div className="mt-4">
           <select
             className="bg-white border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            value={selectedBranch}
-            onChange={(e) => setSelectedBranch(e.target.value)}
+            value={selectedCounty}
+            onChange={(e) => setSelectedCounty(e.target.value)}
           >
-            <option>All Branches</option>
-            <option>Charlotte Main</option>
-            <option>Raleigh North</option>
-            <option>Greensboro</option>
-            <option>Winston-Salem</option>
-            <option>Durham</option>
+            <option>All Counties</option>
+            {counties.map(c => <option key={c}>{c}</option>)}
           </select>
+          <span className="ml-3 text-sm text-gray-500">
+            {filteredOffices.length} office{filteredOffices.length !== 1 ? 's' : ''} shown
+          </span>
         </div>
       </div>
 
       {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <StatCard title="Daily Visitors" value="1,009" change={12} icon={Users} color="blue" />
+        <StatCard title={`Total Offices (${offices.length})`} value="1,143 visitors" change={12} icon={Users} color="blue" />
         <StatCard title="Avg Wait Time" value="22 min" change={-8} icon={Clock} color="green" />
         <StatCard title="Appointment Slots" value="84%" change={5} icon={Calendar} color="yellow" />
         <StatCard title="Customer Satisfaction" value="4.2/5" change={3} icon={Star} color="green" />
@@ -261,6 +259,42 @@ const DMVDashboard = () => {
             ))}
           </div>
         </div>
+      </div>
+
+      {/* Office Directory */}
+      <div className="mb-8">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+            <Building2 className="h-5 w-5 text-blue-500" />
+            NC DMV Office Directory
+          </h2>
+          <span className="text-sm text-gray-500 bg-blue-50 border border-blue-200 px-3 py-1 rounded-full">
+            {filteredOffices.length} offices · {selectedCounty}
+          </span>
+        </div>
+        <div className="bg-white rounded-lg shadow-md overflow-hidden">
+          <div className="grid grid-cols-1 divide-y divide-gray-100">
+            {filteredOffices.map((office, i) => (
+              <div key={i} className="flex items-start justify-between px-5 py-3 hover:bg-gray-50 transition-colors">
+                <div className="flex items-start gap-3">
+                  <MapPin className="h-4 w-4 text-gray-400 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="font-medium text-gray-900">{office.city}</p>
+                    <p className="text-sm text-gray-500">{office.address}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-gray-600 ml-4 flex-shrink-0">
+                  <Phone className="h-3.5 w-3.5 text-gray-400" />
+                  <span>{office.phone}</span>
+                  <span className="ml-2 px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 text-xs">{office.county}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <p className="mt-2 text-xs text-gray-400 text-right">
+          Source: NCDOT DMV Office Locator · Operational metrics above are simulated
+        </p>
       </div>
 
       {/* Footer */}
