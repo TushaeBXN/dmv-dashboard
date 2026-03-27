@@ -40,12 +40,55 @@ const DMVDashboard = () => {
     { month: 'Jun', score: 4.3 }
   ];
 
-  const onlineServices = [
-    { name: 'License Renewal', usage: 68, color: '#22c55e' },
-    { name: 'Registration', usage: 45, color: '#3b82f6' },
-    { name: 'Address Change', usage: 82, color: '#8b5cf6' },
-    { name: 'Duplicate License', usage: 34, color: '#f59e0b' },
-    { name: 'Voter Registration', usage: 56, color: '#ef4444' }
+  // Real NC DMV online services from ncdot.gov/dmv/offices-services/online
+  const onlineServiceCategories = [
+    {
+      name: 'License & ID',
+      color: '#22c55e',
+      usage: 42,
+      services: [
+        'Renew Driver License & ID',
+        'Order Duplicate License & ID Cards',
+        'Upgrade Level 2 to Level 3',
+        'Upgrade Level 3 to Regular Class C',
+        'Order Driving Record',
+        'Make Driver License Appointment',
+        'Request Interpreter Services',
+      ],
+    },
+    {
+      name: 'Registration & Tax',
+      color: '#3b82f6',
+      usage: 31,
+      services: [
+        'Renew Registration & Pay Property Tax',
+        'Pay Property Tax (New Vehicle)',
+        'Order Duplicate Registration Card',
+        'Order Personalized & Specialty Plates',
+      ],
+    },
+    {
+      name: 'Insurance',
+      color: '#8b5cf6',
+      usage: 12,
+      services: [
+        'Pay Penalty — Citizen Insurance Lapse',
+        'Pay Penalty — Commercial Insurance Lapse',
+        'Insurance Company Portal Login',
+      ],
+    },
+    {
+      name: 'Other Services',
+      color: '#f59e0b',
+      usage: 15,
+      services: [
+        'Voter Registration Application',
+        'MyDMV Login',
+        'Renew TRANS EXPRESS',
+        'Renew Permanent Disability Placard',
+        'Order Crash Reports',
+      ],
+    },
   ];
 
   const examinerProductivity = [
@@ -185,26 +228,54 @@ const DMVDashboard = () => {
           </ResponsiveContainer>
         </div>
 
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Online Services Adoption</h3>
-          <ResponsiveContainer width="100%" height={300}>
+      </div>
+
+      {/* Online Services — full width */}
+      <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold text-gray-900">Online Services Adoption</h3>
+          <span className="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded-full">
+            {onlineServiceCategories.reduce((n, c) => n + c.services.length, 0)} services · ncdot.gov
+          </span>
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Pie chart */}
+          <ResponsiveContainer width="100%" height={280}>
             <PieChart>
               <Pie
-                data={onlineServices}
+                data={onlineServiceCategories}
                 cx="50%"
                 cy="50%"
                 labelLine={false}
                 label={({ name, usage }) => `${name}: ${usage}%`}
-                outerRadius={80}
+                outerRadius={90}
                 dataKey="usage"
               >
-                {onlineServices.map((entry, index) => (
+                {onlineServiceCategories.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}
               </Pie>
-              <Tooltip />
+              <Tooltip formatter={(val) => `${val}% of online transactions`} />
             </PieChart>
           </ResponsiveContainer>
+
+          {/* Service list by category */}
+          <div className="space-y-4 overflow-auto max-h-72">
+            {onlineServiceCategories.map((cat) => (
+              <div key={cat.name}>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="inline-block w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: cat.color }} />
+                  <span className="text-sm font-semibold text-gray-700">{cat.name}</span>
+                  <span className="text-xs text-gray-400">({cat.services.length})</span>
+                </div>
+                <ul className="ml-5 space-y-0.5">
+                  {cat.services.map((svc) => (
+                    <li key={svc} className="text-sm text-gray-600">— {svc}</li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
